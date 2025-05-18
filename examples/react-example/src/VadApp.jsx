@@ -8,6 +8,7 @@ export default function VadApp() {
   const stateRef = useRef(null);
   const workletRef = useRef(null);
 
+
   function downsampleBuffer(buffer, sampleRate, outRate) {
     if (outRate === sampleRate) {
       return buffer;
@@ -49,7 +50,6 @@ export default function VadApp() {
       node.connect(mute);
       mute.connect(ctx.destination);
       workletRef.current = node;
-
       setReady(true);
     }
     init();

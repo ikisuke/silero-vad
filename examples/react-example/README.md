@@ -27,6 +27,7 @@ This example demonstrates how to use the **silero-vad** ONNX model inside a Reac
 
 - `package.json` – minimal project configuration.
 - `src/VadApp.jsx` – React component loading the model, capturing microphone audio via an AudioWorklet and showing detection results.
+- `src/VadApp.jsx` – React component loading the model, capturing microphone audio and showing detection results.
 - `src/index.jsx` – entry point rendering the component.
 - `src/vad-processor.js` – AudioWorklet processor forwarding audio buffers to the React app.
 
