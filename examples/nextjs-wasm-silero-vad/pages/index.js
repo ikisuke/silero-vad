@@ -6,10 +6,12 @@ export default function Home() {
   const [speech, setSpeech] = useState(false);
   const sessionRef = useRef(null);
   const stateRef = useRef(null);
+  const denoiseSessionRef = useRef(null);
 
   useEffect(() => {
     async function init() {
       sessionRef.current = await ort.InferenceSession.create('/silero_vad.onnx');
+      denoiseSessionRef.current = await ort.InferenceSession.create('/deepfilternet3.onnx');
       stateRef.current = new ort.Tensor('float32', new Float32Array(2 * 1 * 128), [2, 1, 128]);
       await setupWorklet();
       setReady(true);
@@ -30,7 +32,17 @@ export default function Home() {
 
   async function process(audio) {
     if (!sessionRef.current || !stateRef.current) return;
-    const input = new ort.Tensor('float32', audio, [1, audio.length]);
+    let processed = audio;
+    if (denoiseSessionRef.current) {
+      const dfInput = new ort.Tensor('float32', audio, [1, audio.length]);
+      try {
+        const dfResults = await denoiseSessionRef.current.run({ input: dfInput });
+        processed = dfResults.output.data;
+      } catch (e) {
+        console.error('DeepFilterNet3 inference failed:', e);
+      }
+    }
+    const input = new ort.Tensor('float32', processed, [1, processed.length]);
     const sr = new ort.Tensor('int64', new BigInt64Array([16000n]), [1]);
     const feeds = { input, state: stateRef.current, sr };
     const results = await sessionRef.current.run(feeds);

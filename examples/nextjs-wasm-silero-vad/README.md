@@ -13,10 +13,17 @@
    ```bash
    cp ../../src/silero_vad/data/silero_vad.onnx public/
    ```
-4. 開発サーバを起動します。
+4. DeepFilterNet3 の ONNX モデル (`deepfilternet3.onnx`) を `public/` にコピーします。
+   モデルファイルは [DeepFilterNet3](https://github.com/Rikorose/DeepFilterNet)
+   リポジトリのリリースページから取得してください。
+   ```bash
+   cp /path/to/deepfilternet3.onnx public/
+   ```
+5. 開発サーバを起動します。
    ```bash
    npm run dev
    ```
-5. ブラウザで `http://localhost:3000` を開き、マイク入力に対して VAD が動作するか確認します。
+6. ブラウザで `http://localhost:3000` を開き、マイク入力に対して VAD と
+   ノイズ抑制が動作するか確認します。
 
 `public/vad-worklet.js` で AudioWorkletProcessor を定義し、`pages/index.js` から `onnxruntime-web` を用いて推論を実行します。音声は 16kHz モノラルで処理されます。
