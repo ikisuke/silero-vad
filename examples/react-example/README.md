@@ -5,14 +5,18 @@ This example demonstrates how to use the **silero-vad** ONNX model inside a Reac
 ## Setup
 
 1. Install Node.js (v16 or later).
-2. Navigate to this directory and install dependencies (both runtime and
-   development):
+2. Navigate to this directory and install dependencies:
+   ```bash
+   npm install
+   ```
+3. Download the model `silero_vad.onnx` from the repository (`src/silero_vad/data/`)
+   and place it next to this README. The webpack configuration copies it to the
+   build folder so the browser can load it.
 
 
    ```bash
    npm install
    ```
-3. Download the model `silero_vad.onnx` from `src/silero_vad/data/` and place it in this directory.
 4. Start the development server:
    ```bash
    npm start
