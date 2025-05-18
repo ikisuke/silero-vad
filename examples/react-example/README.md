@@ -22,6 +22,11 @@ This example demonstrates how to use the **silero-vad** ONNX model inside a Reac
    ```
 6. Open `http://localhost:3000` to see the demo.
 
+To create a production build run:
+```bash
+npm run build
+```
+
 ## Files
 
 - `package.json` – minimal project configuration.
@@ -30,3 +35,5 @@ This example demonstrates how to use the **silero-vad** ONNX model inside a Reac
 - `src/vad-processor.js` – AudioWorklet processor forwarding audio buffers to the React app.
 
 The example now includes basic microphone handling so it immediately reacts to speech.
+
+For a walkthrough of how the component works, see [../../docs/VadApp.md](../../docs/VadApp.md).
