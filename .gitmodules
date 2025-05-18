@@ -1,0 +1,3 @@
+[submodule "examples/nextjs-wasm-silero-vad/DeepFilterNet"]
+	path = examples/nextjs-wasm-silero-vad/DeepFilterNet
+	url = https://github.com/Rikorose/DeepFilterNet

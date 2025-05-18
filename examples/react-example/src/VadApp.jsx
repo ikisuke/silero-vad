@@ -7,6 +7,9 @@ export default function VadApp() {
   const sessionRef = useRef(null);
   const stateRef = useRef(null);
   const workletRef = useRef(null);
+  const bufferRef = useRef([]); // holds downsampled audio between model calls
+  const contextRef = useRef(new Float32Array(64).fill(0)); // last 64 samples
+  const processingRef = useRef(false);
 
 
   function downsampleBuffer(buffer, sampleRate, outRate) {
@@ -61,15 +64,34 @@ export default function VadApp() {
     };
   }, []);
 
-  async function process(audioData) {
+  const WINDOW = 512;
+  const CONTEXT = 64;
+
+  async function runModel(inputData) {
     if (!sessionRef.current) return;
-    const input = new ort.Tensor('float32', audioData, [1, audioData.length]);
+    const input = new ort.Tensor('float32', inputData, [1, inputData.length]);
     const sr = new ort.Tensor('int64', new BigInt64Array([16000n]), [1]);
     const feeds = { input, state: stateRef.current, sr };
     const results = await sessionRef.current.run(feeds);
     stateRef.current = results.stateN;
     const out = results.output.data[0];
     setSpeech(out > 0.5);
+  }
+
+  async function process(audioData) {
+    bufferRef.current.push(...audioData);
+    if (processingRef.current) return;
+    processingRef.current = true;
+    while (bufferRef.current.length >= WINDOW) {
+      const chunk = bufferRef.current.slice(0, WINDOW);
+      bufferRef.current = bufferRef.current.slice(WINDOW);
+      const inputData = new Float32Array(WINDOW + CONTEXT);
+      inputData.set(contextRef.current, 0);
+      inputData.set(chunk, CONTEXT);
+      await runModel(inputData);
+      contextRef.current = inputData.slice(WINDOW);
+    }
+    processingRef.current = false;
   }
 
   return (
