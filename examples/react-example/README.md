@@ -12,6 +12,11 @@ This example demonstrates how to use the **silero-vad** ONNX model inside a Reac
 3. Download the model `silero_vad.onnx` from the repository (`src/silero_vad/data/`)
    and place it next to this README. The webpack configuration copies it to the
    build folder so the browser can load it.
+
+
+   ```bash
+   npm install
+   ```
 4. Start the development server:
    ```bash
    npm start
