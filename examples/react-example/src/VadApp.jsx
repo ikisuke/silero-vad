@@ -6,7 +6,8 @@ export default function VadApp() {
   const [speech, setSpeech] = useState(false);
   const sessionRef = useRef(null);
   const stateRef = useRef(null);
-  const processorRef = useRef(null);
+  const workletRef = useRef(null);
+
 
   function downsampleBuffer(buffer, sampleRate, outRate) {
     if (outRate === sampleRate) {
@@ -35,29 +36,27 @@ export default function VadApp() {
       stateRef.current = new ort.Tensor('float32', new Float32Array(2 * 1 * 128), [2, 1, 128]);
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const ctx = new AudioContext({ sampleRate: 16000 });
+      const ctx = new AudioContext();
       const source = ctx.createMediaStreamSource(stream);
-      const processor = ctx.createScriptProcessor(512, 1, 1);
+      await ctx.audioWorklet.addModule('vad-processor.js');
+      const node = new AudioWorkletNode(ctx, 'vad-processor');
       const mute = ctx.createGain();
       mute.gain.value = 0;
-      processor.onaudioprocess = (e) => {
-        const data = e.inputBuffer.getChannelData(0);
-        const copy = new Float32Array(data);
-        const down = downsampleBuffer(copy, ctx.sampleRate, 16000);
+      node.port.onmessage = (e) => {
+        const down = downsampleBuffer(e.data, ctx.sampleRate, 16000);
         process(down);
       };
-      source.connect(processor);
-      processor.connect(mute);
+      source.connect(node);
+      node.connect(mute);
       mute.connect(ctx.destination);
-      processorRef.current = processor;
-
+      workletRef.current = node;
       setReady(true);
     }
     init();
 
     return () => {
-      if (processorRef.current) {
-        processorRef.current.disconnect();
+      if (workletRef.current) {
+        workletRef.current.disconnect();
       }
     };
   }, []);
