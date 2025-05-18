@@ -31,6 +31,7 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: 'silero_vad.onnx', to: 'silero_vad.onnx' },
+        { from: 'src/vad-processor.js', to: 'vad-processor.js' },
       ],
     }),
   ],
