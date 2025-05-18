@@ -5,7 +5,10 @@ This example demonstrates how to use the **silero-vad** ONNX model inside a Reac
 ## Setup
 
 1. Install Node.js (v16 or later).
-2. Navigate to this directory and install dependencies:
+2. Navigate to this directory and install dependencies (both runtime and
+   development):
+
+
    ```bash
    npm install
    ```
