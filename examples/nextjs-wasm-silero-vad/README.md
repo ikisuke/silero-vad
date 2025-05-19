@@ -24,3 +24,5 @@
 
 `public/vad-worklet.js` と `public/denoise-worklet.js` で AudioWorkletProcessor を定義します。VAD ではメインスレッドから `onnxruntime-web` を用いて推論を実行し、デノイズでは `denoise-worker.js` が推論を担当します。音声は VAD では 16kHz、デノイズでは 48kHz モノラルで処理されます。
 
+VAD モデルは 512 サンプルのフレームと 64 サンプルのコンテキストを入力として受け取ります。本サンプルでは AudioWorklet から渡されるデータをバッファに保持し、長さ `576` のテンソルを作成してから推論を行います。
+

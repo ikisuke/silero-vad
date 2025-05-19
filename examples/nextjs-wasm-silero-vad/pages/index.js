@@ -6,6 +6,12 @@ export default function Home() {
   const [speech, setSpeech] = useState(false);
   const sessionRef = useRef(null);
   const stateRef = useRef(null);
+  const bufferRef = useRef([]);
+  const contextRef = useRef(new Float32Array(64).fill(0));
+  const processingRef = useRef(false);
+
+  const WINDOW = 512;
+  const CONTEXT = 64;
 
   useEffect(() => {
     async function init() {
@@ -23,19 +29,35 @@ export default function Home() {
     await audioContext.audioWorklet.addModule('/vad-worklet.js');
     const source = audioContext.createMediaStreamSource(stream);
     const workletNode = new AudioWorkletNode(audioContext, 'vad-worklet');
-    workletNode.port.onmessage = (e) => process(e.data);
+    workletNode.port.onmessage = (e) => processChunk(e.data);
     source.connect(workletNode);
     workletNode.connect(audioContext.destination);
   }
 
-  async function process(audio) {
-    if (!sessionRef.current || !stateRef.current) return;
-    const input = new ort.Tensor('float32', audio, [1, audio.length]);
+  async function runModel(inputData) {
+    if (!sessionRef.current) return;
+    const input = new ort.Tensor('float32', inputData, [1, inputData.length]);
     const sr = new ort.Tensor('int64', new BigInt64Array([16000n]), [1]);
     const feeds = { input, state: stateRef.current, sr };
     const results = await sessionRef.current.run(feeds);
     stateRef.current = results.stateN;
     setSpeech(results.output.data[0] > 0.5);
+  }
+
+  async function processChunk(audio) {
+    bufferRef.current.push(...audio);
+    if (processingRef.current) return;
+    processingRef.current = true;
+    while (bufferRef.current.length >= WINDOW) {
+      const chunk = bufferRef.current.slice(0, WINDOW);
+      bufferRef.current = bufferRef.current.slice(WINDOW);
+      const inputData = new Float32Array(WINDOW + CONTEXT);
+      inputData.set(contextRef.current, 0);
+      inputData.set(chunk, CONTEXT);
+      await runModel(inputData);
+      contextRef.current = inputData.slice(WINDOW);
+    }
+    processingRef.current = false;
   }
 
   return (
