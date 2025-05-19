@@ -38,6 +38,7 @@ export default function Denoise() {
     <main>
       <h1>DeepFilterNet3 Denoise Demo</h1>
       {ready ? <p>Processing...</p> : <p>Loading model...</p>}
+
     </main>
   );
 }

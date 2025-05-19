@@ -23,3 +23,4 @@
    `http://localhost:3000/denoise` では DeepFilterNet3 を用いたデノイズ処理のデモが実行されます（モデルと `ort.min.js` が存在する場合）。
 
 `public/vad-worklet.js` と `public/denoise-worklet.js` で AudioWorkletProcessor を定義します。VAD ではメインスレッドから `onnxruntime-web` を用いて推論を実行し、デノイズでは `denoise-worker.js` が推論を担当します。音声は VAD では 16kHz、デノイズでは 48kHz モノラルで処理されます。
+
