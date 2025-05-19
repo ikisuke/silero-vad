@@ -1,8 +1,13 @@
 let ort;
+let inputBuf;
+let outputBuf;
+
 self.onmessage = async (e) => {
   const { type } = e.data;
   if (type === 'init') {
-    const { modelUrl } = e.data;
+    const { modelUrl, sabIn, sabOut } = e.data;
+    inputBuf = new Float32Array(sabIn);
+    outputBuf = new Float32Array(sabOut);
     if (!ort) {
       try {
         importScripts('/ort.min.js');
@@ -20,13 +25,14 @@ self.onmessage = async (e) => {
     self.state = new ort.Tensor('float32', new Float32Array(2 * 1 * 512), [2, 1, 512]);
     postMessage({ type: 'ready' });
   } else if (type === 'process') {
-    if (!self.session || !self.state) return;
-    const input = new ort.Tensor('float32', e.data.audio, [1, e.data.audio.length]);
+    if (!self.session || !self.state || !inputBuf || !outputBuf) return;
+    const input = new ort.Tensor('float32', inputBuf, [1, inputBuf.length]);
     try {
       const feeds = { input, state: self.state };
       const results = await self.session.run(feeds);
       self.state = results.state;
-      postMessage({ type: 'output', audio: results.output.data }, [results.output.data.buffer]);
+      outputBuf.set(results.output.data);
+      postMessage({ type: 'outputReady' });
     } catch (err) {
       postMessage({ type: 'error', message: 'inference failed' });
     }
