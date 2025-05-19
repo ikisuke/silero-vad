@@ -42,6 +42,7 @@ export default function Home() {
     <main>
       <h1>Silero VAD Next.js Demo</h1>
       {ready ? <p>{speech ? 'Speech' : 'Silence'}</p> : <p>Loading...</p>}
+      <p><a href="/denoise">Denoise Demo</a></p>
     </main>
   );
 }
