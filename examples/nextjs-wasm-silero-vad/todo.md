@@ -1,0 +1,1 @@
+- 他の postMessage で SharedArrayBuffer を transfer list に含めていないか確認する
